@@ -1,0 +1,48 @@
+---
+title: "Emissions Report"
+author: "Hana Strickland"
+date: "5/7/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("knitr")
+library("dplyr")
+library("ggplot2")
+library("tidyr")
+source("a6.R")
+```
+# Summary Visualizations
+
+## World CO2 Emissions Over Time
+
+```{r Graphic1 co2 and gdp, echo = FALSE}
+get_gdp_co2_year_graphic()
+```
+
+> This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. The colors (from blue to orange) represent GDP. The graph shows that CO2 emissions have been increasing each year, except in 2009, during the World Financial Crisis. CO2 Emissions also increased less rapidly between 2000 and 2001, during the Dot.Com crash.
+
+
+(1e + 12 = 1 trillion) 
+
+
+## Regional CO2 Emissions Over Time
+```{r Graphic2 Regional Emissions, echo = FALSE}
+get_regional_co2_emissions()
+```
+
+# World Map of CO2 Emissions
+
+## CO2 Emissions by Country
+```{r Graphic3 World Map, echo = FALSE}
+get_world_map()
+```
+
+# Interactive Visualization
+
+## GDP and CO2 Over Time in the Ten Largest Economies
+```{r Graphic4 Interactive Visual, echo = FALSE}
+get_interactive_visual()
+```
+

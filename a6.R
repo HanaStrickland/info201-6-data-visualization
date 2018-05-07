@@ -1,14 +1,14 @@
 # Questions:
-# Is "most recent" 2015? Can I change the label to 2015?
 # Total gdp is different online than from what I summed up
 # Changing column names of years
 # breaks don't equal labels, no +10 million kt label
+# Changing label to trillions
+# Paragraph in .Rmd
 
 # To Do:
-# 1. Detailed caption for first visual
-# 2. Second Visual
-# 3. Detailed caption for second visual
-# 4. Map tiers
+# 1. Detailed captions
+# 2. Graphic 1 key needs to change to accending
+
 
 library("dplyr")
 library("ggplot2")
@@ -21,8 +21,16 @@ emissions_data <- read.csv("data/WDI_emissions_Data.csv", stringsAsFactors = FAL
 country_data <- read.csv("data/WDI_selected_Data.csv", stringsAsFactors = FALSE, na.strings = "..")
 
 # Change years to match co2 years format
-colnames(country_data) <- c("Country.Name", "Country.Code", "Series.Name", "Series.Code","YR1998", "YR1999", "YR2000", "YR2001", "YR2002", "YR2003", "YR2004", "YR2005", "YR2006",
-                            "YR2007", "YR2008", "YR2009", "YR2010", "YR2011", "YR2012", "YR2013", "YR2014", "Most_Recent" )
+
+years_in_YRxxxx_form <- c("YR1998", "YR1999", "YR2000", "YR2001", "YR2002", "YR2003", "YR2004", 
+                          "YR2005", "YR2006", "YR2007", "YR2008", "YR2009", "YR2010", "YR2011", 
+                          "YR2012", "YR2013", "YR2014")
+
+
+colnames(country_data) <- c(
+  "Country.Name", "Country.Code", "Series.Name", "Series.Code",years_in_YRxxxx_form, "Most_Recent"
+)
+
 
 filter_co2_emissions_kt <- function() {
   filter_data <-
@@ -50,12 +58,12 @@ filtered_gdp <- filter_gdp()
 filter_life_expectancy <- function() {
   filter_data <-
     country_data %>%
-    filter(Series.Code == "SP.POP.TOTL") %>%
+    filter(Series.Code == "SP.DYN.LE00.IN") %>%
     select(-Most_Recent)
-  
-  filter_data_long <- gather(filter_data, key = year, value = life_expectancy, "YR1998", "YR1999", "YR2000", "YR2001", "YR2002", "YR2003", "YR2004", "YR2005", "YR2006",
-                             "YR2007", "YR2008", "YR2009", "YR2010", "YR2011", "YR2012", "YR2013", "YR2014")
-  
+
+  filter_data_long <- gather(filter_data,
+    key = year, value = life_expectancy, years_in_YRxxxx_form
+  )
 }
 
 filtered_life_expectancy <- filter_life_expectancy()
@@ -64,7 +72,7 @@ filtered_life_expectancy <- filter_life_expectancy()
 ### Question: How has co2 emissions changed between 1998 and 2014  in relation to GDP? ###
 
 get_gdp_co2_year_graphic <- function() {
-  
+
   # Filter for co2 emissions and gdp
   filtered_co2
   filtered_gdp
@@ -94,15 +102,17 @@ get_gdp_co2_year_graphic <- function() {
   # Plot data
   plot_graphic <- ggplot(data = both_co2_gdp) +
     geom_point(mapping = aes(x = year, y = total_co2, color = total_gdp)) +
-    scale_color_gradientn(colors = c("blue", "orange")) +
+    scale_color_gradientn(colors = c("blue", "green", "orange"), 
+                          guide = guide_legend(title = "Total GDP", reverse = TRUE),
+                          breaks = c(4e+13, 5e+13, 6e+13, 7e+13), 
+                          labels = c("40 Trillion", "50 Trillion", "60 Trillion", "70 Trillion")
+                          ) +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-    labs(title = "Change in CO2 Emissions Over Time in Relation to GDP")
+    labs(title = "Change in CO2 Emissions Over Time in Relation to GDP", x = "Year", y = "CO2 (kt)") 
 
   plot_graphic
 }
-
 get_gdp_co2_year_graphic()
-
 ### Question: Regionally, how has co2 emissions changed between 2004 and 2014? ###
 
 get_regional_co2_emissions <- function() {
@@ -132,9 +142,14 @@ get_regional_co2_emissions <- function() {
     geom_point(mapping = aes(x = year, y = co2_emitted, color = Region)) +
     facet_wrap(~ Region) +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-    labs(title = "Change in CO2 Emissions Over Time in Relation By Region")
+    labs(
+      title = "Change in CO2 Emissions Over Time in Relation By Region",
+      caption = "(kt = kilotons)",
+      x = "Year", y = "CO2 (kt)"
+    )
+    
 }
-get_regional_co2_emissions()
+
 ### Question: How do co2 emissions compare between different countries in 2014? ###
 
 ### World CO2 Emissions ###
@@ -159,11 +174,12 @@ get_world_map <- function() {
 
   factors_of_emissions <- cut(world_map_and_co2$YR2014,
     breaks = scale_breaks,
-    labels = c("less than 100kt", "100 - 1,000kt", "1,000 - 10,000kt", "10,000 - 100,000kt", "100,000 - 1,000,000kt", "1,000,000 - 10,000,000"),
+    labels = c("less than 100kt", "100 - 1,000kt", "1,000 - 10,000kt", "10,000 - 100,000kt", 
+               "100,000 - 1,000,000kt", "1,000,000 - 10,000,000"),
     ordered_result = TRUE
   )
-  
-  factors_of_emissions <- as.data.frame(factors_of_emissions) #ordered factor to data frame
+
+  factors_of_emissions <- as.data.frame(factors_of_emissions) # ordered factor to data frame
 
   world_map_and_co2$emission_level <- factors_of_emissions # new column for emissions level
 
@@ -171,95 +187,110 @@ get_world_map <- function() {
     geom_polygon(aes(x = long, y = lat, group = group, fill = emission_level)) +
     coord_quickmap() +
     scale_fill_brewer(type = div, palette = "Set2") +
-    theme(legend.position = "bottom") + 
-    labs(title = "World Map of CO2 Emissions", 
-         caption = "(Based on data from the World Bank)",
-         x = "Longitude", y = "Latitude")
-    
-  
+    theme(legend.position = "bottom") +
+    labs(
+      title = "World Map of CO2 Emissions",
+      caption = "(Based on data from the World Bank)",
+      x = "Longitude", y = "Latitude"
+    )
+
+
   plot_graphic
 }
 
 
-# YR2014
-# Min.   :      11
-# 1st Qu.:    1335
-# Median :    9109
-# Mean   :  165114
-# 3rd Qu.:   59864
-# Max.   :10291927
-
-
 ### Interactive Visualization ###
 
-# GDP and CO2 in 2014 
+# GDP and CO2 in 2014
 
-# Filter for co2 emissions and gdp
-co2_interactive <- filtered_co2 %>% 
-  select(-Series.Code)  
+get_interactive_visual <- function() {
 
-gdp_interactive <- filtered_gdp %>% 
-  select(-Series.Code, -Series.Name)
+  # Filter for co2 emissions and gdp
+  co2_interactive <- filtered_co2 %>%
+    select(-Series.Code)
 
-
-# make them long form
-co2_long <- gather(co2_interactive,
-                        key = year, value = co2_emitted, 
-                   "YR1998", "YR1999", "YR2000", "YR2001", "YR2002", "YR2003",
-                   "YR2004", "YR2005", "YR2006", "YR2007",
-                   "YR2008", "YR2009", "YR2010", "YR2011",
-                   "YR2012", "YR2013", "YR2014")
-
-gdp_long <- gather(gdp_interactive,
-                  key = year, value = GDP, 
-                  "YR1998", "YR1999", "YR2000", "YR2001", "YR2002", "YR2003",
-                  "YR2004", "YR2005", "YR2006", "YR2007",
-                  "YR2008", "YR2009", "YR2010", "YR2011",
-                  "YR2012", "YR2013", "YR2014")
+  gdp_interactive <- filtered_gdp %>%
+    select(-Series.Code, -Series.Name)
 
 
-gdp_co2_interactive <- left_join(co2_long, gdp_long, by = c("Country.Code", "year"))
+  # make them long form
+  co2_long <- gather(co2_interactive,
+    key = year, value = co2_emitted, years_in_YRxxxx_form
+  )
 
-# organize columns
-gdp_co2_interactive <- gdp_co2_interactive %>%
-  select(Country.Code, Country.Name, year, co2_emitted, GDP)
+  gdp_long <- gather(gdp_interactive,
+    key = year, value = GDP, years_in_YRxxxx_form
+  )
 
-# Get regional info (from assignment 3 data folder)
-world_region_info <- read.csv("data/life_expectancy.csv", stringsAsFactors = FALSE)
 
-world_region_info <- world_region_info %>% 
-  select(country, region, income_group)
+  gdp_co2_interactive <- left_join(co2_long, gdp_long, by = c("Country.Code", "year"))
 
-gdp_co2_interactive <- left_join(gdp_co2_interactive, world_region_info, 
-                                      by = c("Country.Name" = "country"))
+  # organize columns
+  gdp_co2_interactive <- gdp_co2_interactive %>%
+    select(Country.Code, Country.Name, year, co2_emitted, GDP)
 
-# add life expectancy info to data frame
-gdp_co2_interactive <- left_join(gdp_co2_interactive, filtered_life_expectancy, by = c("Country.Code", "Country.Name", "year"))
+  # Get regional info (from assignment 3 data folder)
+  world_region_info <- read.csv("data/life_expectancy.csv", stringsAsFactors = FALSE)
 
-gdp_co2_interactive <- gdp_co2_interactive %>% 
-  filter(Country.Code %in% c("USA", "CHN", "JPN", "DEU", "GBR", "FRA", "IND", "ITA", "BRA", "CAN"))
-View(gdp_co2_interactive)
+  world_region_info <- world_region_info %>%
+    select(country, region, income_group)
 
-interactive_plot <- gdp_co2_interactive %>%
-  plot_ly(
-    x = ~GDP,
-    y = ~co2_emitted,
-    frame = ~year,
-    type = "scatter",
-    mode = "markers",
-    #size = ~life_expectancy
-    #marker = list(size = ~life_expectancy),
-    color = ~region,
-    text = ~Country.Name,
-    showlegend = F
-  ) %>%
-  layout(title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
-    xaxis = list(type = "log"),
-    yaxis = list(type = "log")
+  gdp_co2_interactive <- left_join(gdp_co2_interactive, world_region_info,
+    by = c("Country.Name" = "country")
+  )
+
+  # add life expectancy info to data frame
+  gdp_co2_interactive <- left_join(gdp_co2_interactive, filtered_life_expectancy, 
+                                   by = c("Country.Code", "Country.Name", "year"))
+
+  gdp_co2_interactive <- gdp_co2_interactive %>%
+    filter(Country.Code %in% c("USA", "CHN", "JPN", "DEU", "GBR", "FRA", "IND", "ITA", "BRA", "CAN"))
+
+  
+  co2_1dim <- gdp_co2_interactive$co2_emitted
+
+  plot_visual <- gdp_co2_interactive %>%  
+    plot_ly( x = ~gdp_co2_interactive$GDP, 
+             y = ~co2_1dim, 
+             frame = gdp_co2_interactive$year, 
+             text = gdp_co2_interactive$Country.Name,
+             color = ~gdp_co2_interactive$region
+             ) %>%
+    add_markers() %>%
+    add_text(textposition = "left") %>%
+    layout(showlegend = FALSE) %>% 
+    layout(
+      title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
+      xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
+      yaxis = list(title = "CO2 Emitted in kt", type = "log")
     )
 
-interactive_plot
+  
+  
+  plot_visual
+  
+  interactive_plot <- gdp_co2_interactive %>%
+    plot_ly(
+      x = ~ GDP,
+      y = ~ co2_emitted,
+      frame = ~ year,
+      type = "scatter",
+      mode = "markers",
+      color = ~ region,
+      text = ~ paste("Country: ", Country.Name, "</br> Life Expectancy: ", life_expectancy),
+      showlegend = FALSE
+    ) %>%
+    layout(
+      title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
+      xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
+      yaxis = list(title = "CO2 Emitted in kt", type = "log")
+    ) 
 
+
+  interactive_plot
+}
+
+get_interactive_visual()
 
 
 
@@ -268,6 +299,6 @@ interactive_plot
 # Resources Used:
 # http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html
 # https://plot.ly/r/line-and-scatter/
-# https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf 
-# https://blog.exploratory.io/filter-data-with-dplyr-76cf5f1a258e 
-# https://plot.ly/r/animations/ 
+# https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+# https://blog.exploratory.io/filter-data-with-dplyr-76cf5f1a258e
+# https://plot.ly/r/animations/
