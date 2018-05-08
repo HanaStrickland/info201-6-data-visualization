@@ -10,11 +10,6 @@
 # 2. Graphic 1 key needs to change to accending
 
 
-library("dplyr")
-library("ggplot2")
-library("tidyr")
-library("maps")
-library("plotly")
 
 setwd("~/Desktop/a6-data-visualization-HanaStrickland")
 emissions_data <- read.csv("data/WDI_emissions_Data.csv", stringsAsFactors = FALSE)
@@ -218,7 +213,7 @@ africa_co2_2014 <- regional_data %>%
   select(co2_emitted)
 
 africa_co2_2014 <- paste(format(round(africa_co2_2014 / 1e6, 2), trim = TRUE), "Million")
-africa_co2_2014
+
 
 latin_gdp_2014 <- regional_data %>% 
   filter(year == "2014", Region == "Latin America & Caribbean") %>% 
@@ -255,13 +250,18 @@ world_map_and_co2 <-
   world_map_and_co2 %>%
   select(long, lat, group, order, region, iso, YR2014)
 
-scale_breaks <- c(100, 1000, 10000, 100000, 1000000, 10000000, 100000000) # log10
+scale_breaks <- c(0, 1000, 10000, 100000, 1000000, 10000000, 100000000) # log10
 
 factors_of_emissions <- cut(world_map_and_co2$YR2014,
   breaks = scale_breaks,
   labels = c(
-    "less than 100kt", "100 - 1,000kt", "1,000 - 10,000kt", "10,000 - 100,000kt",
-    "100,000 - 1,000,000kt", "1,000,000 - 10,000,000"
+    "less than 1000kt", 
+    #"100 - 1,000kt", 
+    "1,000 - 10,000kt", 
+    "10,000 - 100,000kt",
+    "100,000 - 1,000,000kt", 
+    "1,000,000 - 10,000,000kt",
+    "+10,000,000kt"
   ),
   ordered_result = TRUE
 )
@@ -278,13 +278,22 @@ plot_world_graphic <- ggplot(data = world_map_and_co2) +
   labs(
     title = "World Map of CO2 Emissions",
     caption = "(Based on data from the World Bank)",
-    x = "Longitude", y = "Latitude"
-  )
+    x = "", y = ""
+  )  +
+  guides(fill = guide_legend(title = "Emission Level"))
 
+# For .Rmd File
+china_co2_2014 <- filtered_co2 %>% 
+  filter(Country.Code == "CHN") %>% 
+  select(YR2014)
 
+china_co2_2014 <- paste(china_co2_2014)
 
+usa_co2_2014 <- filtered_co2 %>% 
+  filter(Country.Code == "USA") %>% 
+  select(YR2014)
 
-
+usa_co2_2014 <- paste(usa_co2_2014)
 
 ### Interactive Visualization ###
 
@@ -347,9 +356,8 @@ plot_interactive <- gdp_co2_interactive %>%
   layout(
     title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
     xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
-    yaxis = list(title = "CO2 Emitted in kt", type = "log")
+    yaxis = list(title = "CO2 Emitted (in kt)", type = "log")
   )
-
 
 # Resources Used:
 # http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html
