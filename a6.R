@@ -147,6 +147,7 @@ gdp_2009 <- paste(format(round(gdp_2009 / 1e12, 2), trim = TRUE), "Trillion")
 ###
 regional_data <- read.csv("data/WDI_regional.csv")
 
+
 regional_change_years_form <- c(
   "2004", "2005", "2006", "2007",
   "2008", "2009", "2010", "2011",
@@ -171,7 +172,7 @@ regional_emissions_long <- gather(regional_emissions,
 regional_gdp <- regional_data %>%
   filter(Series.Code == "NY.GDP.MKTP.CD") %>%
   filter(Country.Name != "World") %>%
-  select(-Country.Code, -Series.Name)
+  select(-Country.Code, -Series.Name) 
 
 names(regional_gdp) <- c(
   "Region", "Series_Code", regional_change_years_form
@@ -183,16 +184,53 @@ regional_gdp_long <- gather(regional_gdp,
 
 regional_data <- left_join(regional_emissions_long, regional_gdp_long, by = c("Region", "year"))
 
-
 regional_data$year <- as.numeric(regional_data$year)
 regional_data[regional_data$Region, ]
 
+
 plot_regional <- ggplot(regional_data, aes(year, co2_emitted, color = factor(Region))) + 
-  geom_point() 
+  geom_point()  +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  guides(color = guide_legend(title = "Region")) +
+  labs(title = "Regional Breakdown of CO2 Emissions", x = "Year", y = "CO2 Emissions (kt)")
 
-# plot_regional_graphic <- plot_regional + facet_grid(. ~ Region) +
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1))
+plot_regional_graphic <- plot_regional + facet_grid(. ~ Region)
 
+
+
+
+# regional_combined <- ggplot(data = regional_data) +
+#   geom_point(mapping = aes(x = year, y = co2_emitted, color = Region)) 
+# regional_combined
+
+
+# For .Rmd File
+africa_gdp_2014 <- regional_data %>% 
+  filter(year == "2014", Region == "Sub-Saharan Africa") %>% 
+  select(GDP)
+
+africa_gdp_2014 <- paste(format(round(africa_gdp_2014 / 1e12, 2), trim = TRUE), "Trillion")
+
+
+
+africa_co2_2014 <- regional_data %>% 
+  filter(year == "2014", Region == "Sub-Saharan Africa") %>% 
+  select(co2_emitted)
+
+africa_co2_2014 <- paste(format(round(africa_co2_2014 / 1e6, 2), trim = TRUE), "Million")
+africa_co2_2014
+
+latin_gdp_2014 <- regional_data %>% 
+  filter(year == "2014", Region == "Latin America & Caribbean") %>% 
+  select(GDP)
+
+latin_gdp_2014 <- paste(format(round(latin_gdp_2014 / 1e12, 2), trim = TRUE), "Trillion")
+
+latin_co2_2014 <- regional_data %>% 
+  filter(year == "2014", Region == "Latin America & Caribbean") %>% 
+  select(co2_emitted)
+
+latin_co2_2014 <- paste(format(round(latin_co2_2014 / 1e6, 2), trim = TRUE), "Million")
 
 
 ###
@@ -311,14 +349,6 @@ plot_interactive <- gdp_co2_interactive %>%
     xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
     yaxis = list(title = "CO2 Emitted in kt", type = "log")
   )
-
-
-
-
-
-
-
-
 
 
 # Resources Used:

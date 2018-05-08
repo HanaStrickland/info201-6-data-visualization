@@ -16,17 +16,21 @@ library("plotly")
 
 source("a6.R")
 ```
+
+# Thesis
+> Co2 emissions has generally been on the rise and is positively correlated with GDP. China, by far, emmits the most CO2.
+
 # Summary Visualizations
 
 ## World CO2 Emissions Over Time
 
 ```{r Graphic1 co2 and gdp, echo = FALSE}
-#plot_co2_gdp_graphic
+plot_co2_gdp_graphic
 
 
 ```
 
-> **About The Graph:** This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. GDP and CO2 levels are positively correlated.  The colors (from blue to orange to green) represent GDP in trillions of dollars. **Results:** Economic performance is related to CO2 emissions. When GDP increases, CO2 levels tend to increase, and when GDP decreases, CO2 levels decrease. This is evident when looking at the data points for 2008 and 2009. In 2008, CO2 Emissions were `r co2_2008` kt. It decreased to `r co2_2009` kt. You'll see that GDP also decreased between these years from `r gdp_2008` to `r gdp_2009`. When GDP went down, CO2 went down. These data points likely reflect the aftermath of the 2008 Financial Crisis. 
+> **About The Graph:** This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. The colors (from blue to orange to green) represent GDP in trillions of dollars. **Results:** CO2 emissions are on an upward trend and is related to economic performance. CO2 emissions increased in all but one year, 2009. When GDP increases, CO2 levels tend to increase, and when GDP decreases, CO2 levels decrease. This is evident when looking at the data points for 2008 and 2009. In 2008, CO2 Emissions were $`r co2_2008` kt. It decreased to $`r co2_2009` kt. You'll see that GDP also decreased between these years from $`r gdp_2008` to $`r gdp_2009`. When GDP went down, CO2 went down. These data points likely reflect the aftermath of the 2008 Financial Crisis. 
 
 
 
@@ -35,8 +39,19 @@ source("a6.R")
 plot_regional_graphic <- plot_regional + facet_grid(. ~ Region) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
 plot_regional_graphic
-# for some reason, horizontal axis labels won't turn when plotting in .R file
 ```
+
+> **About The Graph:** This graph shows a regional breakdown of CO2 emissions between 2004 and 2014. **Results:** CO2 levels are generally on the rise, and rapidly so in East Asia, which is where China is located. Regions for most CO2 emissions to least: 
+
+1. East Asia & Pacific
+2. Europe and Central Asia
+3. North America
+4. Middle East & North Africa
+5. Latin America & Caribbean
+6. Sub-Saharan Africa.
+
+> Sub-Saharan Africa has the lowest CO2 emissions (`r africa_co2_2014` kt), and it also has the lowest GDP in 2014, $`r africa_gdp_2014`. Latin America & Caribbean, by contrast, had a GDP of $`r latin_gdp_2014` and CO2 emissions of `r latin_gdp_2014` kt in 2014. This demonstrates that CO2 levels and GDP are positively correlated. 
+
 
 # World Map of CO2 Emissions
 
@@ -45,6 +60,7 @@ plot_regional_graphic
 #plot_world_graphic
 ```
 
+> 
 # Interactive Visualization
 
 ## GDP and CO2 Over Time in the Ten Largest Economies
