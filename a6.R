@@ -102,22 +102,21 @@ get_gdp_co2_year_graphic <- function() {
   # Plot data
   plot_graphic <- ggplot(data = both_co2_gdp) +
     geom_point(mapping = aes(x = year, y = total_co2, color = total_gdp)) +
-    scale_color_gradientn(colors = c("blue", "green", "orange"), 
+    scale_color_gradientn(colors = c("dark blue", "orange", "dark green"), 
                           guide = guide_legend(title = "Total GDP", reverse = TRUE),
-                          breaks = c(4e+13, 5e+13, 6e+13, 7e+13), 
-                          labels = c("40 Trillion", "50 Trillion", "60 Trillion", "70 Trillion")
+                          breaks = c(4e+13, 4.5e+13, 5e+13, 5.5e+13, 6e+13, 6.5e+13, 7e+13), 
+                          labels = c("40 Trillion", "45 Trillion", "50 Trillion", "55 Trillion", "60 Trillion", "65 Trillion", "70 Trillion")
                           ) +
     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
     labs(title = "Change in CO2 Emissions Over Time in Relation to GDP", x = "Year", y = "CO2 (kt)") 
 
   plot_graphic
 }
-get_gdp_co2_year_graphic()
+
 ### Question: Regionally, how has co2 emissions changed between 2004 and 2014? ###
 
 get_regional_co2_emissions <- function() {
   regional_data <- read.csv("data/WDI_regional.csv")
-
   regional_emissions <- regional_data %>%
     filter(Series.Code == "EN.ATM.CO2E.KT") %>%
     filter(Country.Name != "World") %>%
@@ -125,30 +124,63 @@ get_regional_co2_emissions <- function() {
 
   # Change names to make them shorter and more relevant
   names(regional_emissions) <- c(
-    "Region", "Series_Code", "YR2004", "YR2005", "YR2006", "YR2007",
-    "YR2008", "YR2009", "YR2010", "YR2011",
-    "YR2012", "YR2013", "YR2014"
+    "Region", "Series_Code", "2004", "2005", "2006", "2007",
+    "2008", "2009", "2010", "2011",
+    "2012", "2013", "2014"
   )
 
 
-  regional_long <- gather(regional_emissions,
+  regional_emissions_long <- gather(regional_emissions,
     key = year, value = co2_emitted,
-    "YR2004", "YR2005", "YR2006", "YR2007",
-    "YR2008", "YR2009", "YR2010", "YR2011",
-    "YR2012", "YR2013", "YR2014"
+    "2004", "2005", "2006", "2007",
+    "2008", "2009", "2010", "2011",
+    "2012", "2013", "2014"
   )
+  
+  regional_gdp <- regional_data %>%
+    filter(Series.Code == "NY.GDP.MKTP.CD") %>%
+    filter(Country.Name != "World") %>%
+    select(-Country.Code, -Series.Name)
+  
+  names(regional_gdp) <- c(
+    "Region", "Series_Code", "2004", "2005", "2006", "2007",
+    "2008", "2009", "2010", "2011",
+    "2012", "2013", "2014"
+  )
+  View(regional_gdp)
+  
+  regional_gdp_long <- gather(regional_gdp,
+                              key = year, value = GDP,
+                              "2004", "2005", "2006", "2007",
+                              "2008", "2009", "2010", "2011",
+                              "2012", "2013", "2014"
+  )
+  
+  regional_data <- left_join(regional_emissions_long, regional_gdp_long, by = c("Region", "year"))
+  
+  
+  regional_data$year <- as.numeric(regional_data$year)
+  regional_data[regional_data$Region,]
+  
+  class(regional_data$co2_emitted)
+  
+  plotting <- ggplot(regional_data, aes(year, co2_emitted, color = factor(Region))) + geom_point() 
+  
+  plotting + facet_grid(. ~ Region)
+                       
 
-  ggplot(data = regional_long) +
-    geom_point(mapping = aes(x = year, y = co2_emitted, color = Region)) +
-    facet_wrap(~ Region) +
-    theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-    labs(
-      title = "Change in CO2 Emissions Over Time in Relation By Region",
-      caption = "(kt = kilotons)",
-      x = "Year", y = "CO2 (kt)"
-    )
-    
-}
+
+#   ggplot(data = regional_long) +
+#     geom_point(mapping = aes(x = year, y = co2_emitted, color = Region)) +
+#     facet_wrap(~ Region) +
+#     theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+#     labs(
+#       title = "Change in CO2 Emissions Over Time in Relation By Region",
+#       caption = "(kt = kilotons)",
+#       x = "Year", y = "CO2 (kt)"
+#     )
+#     
+# }
 
 ### Question: How do co2 emissions compare between different countries in 2014? ###
 
@@ -192,11 +224,12 @@ get_world_map <- function() {
       title = "World Map of CO2 Emissions",
       caption = "(Based on data from the World Bank)",
       x = "Longitude", y = "Latitude"
-    )
-
+    ) +
+    geom_label(data = world_map_and_co2, aes(x = long, y = lat, label = region ))
 
   plot_graphic
 }
+
 
 
 ### Interactive Visualization ###
@@ -265,32 +298,10 @@ get_interactive_visual <- function() {
       yaxis = list(title = "CO2 Emitted in kt", type = "log")
     )
 
-  
-  
   plot_visual
   
-  interactive_plot <- gdp_co2_interactive %>%
-    plot_ly(
-      x = ~ GDP,
-      y = ~ co2_emitted,
-      frame = ~ year,
-      type = "scatter",
-      mode = "markers",
-      color = ~ region,
-      text = ~ paste("Country: ", Country.Name, "</br> Life Expectancy: ", life_expectancy),
-      showlegend = FALSE
-    ) %>%
-    layout(
-      title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
-      xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
-      yaxis = list(title = "CO2 Emitted in kt", type = "log")
-    ) 
-
-
-  interactive_plot
 }
 
-get_interactive_visual()
 
 
 
