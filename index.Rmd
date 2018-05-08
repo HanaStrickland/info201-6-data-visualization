@@ -11,6 +11,9 @@ library("knitr")
 library("dplyr")
 library("ggplot2")
 library("tidyr")
+library("maps")
+library("plotly")
+
 source("a6.R")
 ```
 # Summary Visualizations
@@ -18,31 +21,34 @@ source("a6.R")
 ## World CO2 Emissions Over Time
 
 ```{r Graphic1 co2 and gdp, echo = FALSE}
-get_gdp_co2_year_graphic()
+#plot_co2_gdp_graphic
+
+
 ```
 
-> This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. The colors (from blue to orange) represent GDP. The graph shows that CO2 emissions have been increasing each year, except in 2009, during the World Financial Crisis. CO2 Emissions also increased less rapidly between 2000 and 2001, during the Dot.Com crash.
+> **About The Graph:** This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. GDP and CO2 levels are positively correlated.  The colors (from blue to orange to green) represent GDP in trillions of dollars. **Results:** Economic performance is related to CO2 emissions. When GDP increases, CO2 levels tend to increase, and when GDP decreases, CO2 levels decrease. This is evident when looking at the data points for 2008 and 2009. In 2008, CO2 Emissions were `r co2_2008` kt. It decreased to `r co2_2009` kt. You'll see that GDP also decreased between these years from `r gdp_2008` to `r gdp_2009`. When GDP went down, CO2 went down. These data points likely reflect the aftermath of the 2008 Financial Crisis. 
 
-
-(1e + 12 = 1 trillion) 
 
 
 ## Regional CO2 Emissions Over Time
 ```{r Graphic2 Regional Emissions, echo = FALSE}
-get_regional_co2_emissions()
+plot_regional_graphic <- plot_regional + facet_grid(. ~ Region) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
+plot_regional_graphic
+# for some reason, horizontal axis labels won't turn when plotting in .R file
 ```
 
 # World Map of CO2 Emissions
 
 ## CO2 Emissions by Country
 ```{r Graphic3 World Map, echo = FALSE}
-get_world_map()
+#plot_world_graphic
 ```
 
 # Interactive Visualization
 
 ## GDP and CO2 Over Time in the Ten Largest Economies
 ```{r Graphic4 Interactive Visual, echo = FALSE}
-get_interactive_visual()
+#plot_interactive
 ```
 
