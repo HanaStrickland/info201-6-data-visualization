@@ -1,16 +1,3 @@
-# Questions:
-# Total gdp is different online than from what I summed up
-# Changing column names of years
-# breaks don't equal labels, no +10 million kt label
-# Changing label to trillions
-# Paragraph in .Rmd
-
-# To Do:
-# 1. Detailed captions
-# 2. Graphic 1 key needs to change to accending
-
-
-
 setwd("~/Desktop/a6-data-visualization-HanaStrickland")
 emissions_data <- read.csv("data/WDI_emissions_Data.csv", stringsAsFactors = FALSE)
 country_data <- read.csv("data/WDI_selected_Data.csv", stringsAsFactors = FALSE, na.strings = "..")
@@ -52,18 +39,6 @@ filter_gdp <- function() {
 filtered_gdp <- filter_gdp()
 
 
-filter_life_expectancy <- function() {
-  filter_data <-
-    country_data %>%
-    filter(Series.Code == "SP.DYN.LE00.IN") %>%
-    select(-Most_Recent)
-
-  filter_data_long <- gather(filter_data,
-    key = year, value = life_expectancy, years_in_YRxxxx_form
-  )
-}
-
-filtered_life_expectancy <- filter_life_expectancy()
 
 ###
 ### Question: How has co2 emissions changed between 1998 and 2014  in relation to GDP? ###
@@ -101,9 +76,10 @@ plot_co2_gdp_graphic <- ggplot(data = both_co2_gdp) +
     labels = c("40 Trillion", "45 Trillion", "50 Trillion", "55 Trillion", "60 Trillion", "65 Trillion", "70 Trillion")
   ) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  labs(title = "Change in CO2 Emissions Over Time", x = "Year", y = "CO2 (kt)")
+  labs(title = "Change in Global CO2 Emissions Over Time", x = "Year", y = "CO2 (kt)")
 
 # For .Rmd File
+
 co2_2008 <- both_co2_gdp %>% 
   filter(year == "YR2008") %>% 
   select(total_co2)
@@ -136,6 +112,15 @@ gdp_2009 <- both_co2_gdp %>%
 gdp_2009 <- gdp_2009[1,1]
 
 gdp_2009 <- paste(format(round(gdp_2009 / 1e12, 2), trim = TRUE), "Trillion")
+
+
+co2_2014 <- both_co2_gdp %>% 
+  filter(year == "YR2014") %>% 
+  select(total_co2)
+
+co2_2014 <- co2_2014[1,1]
+co2_2014 <- paste(format(round(co2_2014 / 1e6, 2), trim = TRUE), "Million")
+
 
 ###
 ### Question: Regionally, how has co2 emissions changed between 2004 and 2014? ###
@@ -180,52 +165,44 @@ regional_gdp_long <- gather(regional_gdp,
 regional_data <- left_join(regional_emissions_long, regional_gdp_long, by = c("Region", "year"))
 
 regional_data$year <- as.numeric(regional_data$year)
-regional_data[regional_data$Region, ]
-
 
 plot_regional <- ggplot(regional_data, aes(year, co2_emitted, color = factor(Region))) + 
   geom_point()  +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
   guides(color = guide_legend(title = "Region")) +
-  labs(title = "Regional Breakdown of CO2 Emissions", x = "Year", y = "CO2 Emissions (kt)")
+  labs(title = "Regional Breakdown of CO2 Emissions", x = "Year", y = "CO2 Emissions (kt)") +
+  scale_y_continuous(breaks = c(2.5e06, 5e06, 7.5e06, 1e07, 1.25e07), 
+                     labels = c("2.5 Million", "5 Million", "7.5 Million", "10 Million", "12.5 Million") )
 
 plot_regional_graphic <- plot_regional + facet_grid(. ~ Region)
 
 
 
-
-# regional_combined <- ggplot(data = regional_data) +
-#   geom_point(mapping = aes(x = year, y = co2_emitted, color = Region)) 
-# regional_combined
-
-
 # For .Rmd File
-africa_gdp_2014 <- regional_data %>% 
+
+
+display_regional_co2 <- paste(format(round(regional_data$co2_emitted / 1e6, 2), trim = TRUE), "Million")
+
+display_regional_gdp <- paste(format(round(regional_data$GDP / 1e12, 2), trim = TRUE), "Trillion")
+
+regional_data$co2_emitted <- display_regional_co2
+
+regional_data$GDP <- display_regional_gdp
+
+africa_2014 <- regional_data %>% 
   filter(year == "2014", Region == "Sub-Saharan Africa") %>% 
-  select(GDP)
+  select(GDP, co2_emitted)
 
-africa_gdp_2014 <- paste(format(round(africa_gdp_2014 / 1e12, 2), trim = TRUE), "Trillion")
-
-
-
-africa_co2_2014 <- regional_data %>% 
-  filter(year == "2014", Region == "Sub-Saharan Africa") %>% 
-  select(co2_emitted)
-
-africa_co2_2014 <- paste(format(round(africa_co2_2014 / 1e6, 2), trim = TRUE), "Million")
+africa_gdp_2014 <- africa_2014[1, "GDP"]
+africa_co2_2014 <- africa_2014[1, "co2_emitted"]
 
 
-latin_gdp_2014 <- regional_data %>% 
+latin_2014 <- regional_data %>% 
   filter(year == "2014", Region == "Latin America & Caribbean") %>% 
-  select(GDP)
+  select(GDP, co2_emitted)
 
-latin_gdp_2014 <- paste(format(round(latin_gdp_2014 / 1e12, 2), trim = TRUE), "Trillion")
-
-latin_co2_2014 <- regional_data %>% 
-  filter(year == "2014", Region == "Latin America & Caribbean") %>% 
-  select(co2_emitted)
-
-latin_co2_2014 <- paste(format(round(latin_co2_2014 / 1e6, 2), trim = TRUE), "Million")
+latin_gdp_2014 <- latin_2014[1, "GDP"]
+latin_co2_2014 <- latin_2014[1, "co2_emitted"]
 
 
 ###
@@ -241,6 +218,8 @@ iso_data <- iso.alpha(world_map$region, n = 3)
 
 world_map$iso <- iso_data
 
+
+
 # Join map and co2 data
 world_map_and_co2 <- left_join(world_map, filtered_co2,
   by = c("iso" = "Country.Code")
@@ -249,6 +228,8 @@ world_map_and_co2 <- left_join(world_map, filtered_co2,
 world_map_and_co2 <-
   world_map_and_co2 %>%
   select(long, lat, group, order, region, iso, YR2014)
+
+world_map_and_co2 <- na.omit(world_map_and_co2)
 
 scale_breaks <- c(0, 1000, 10000, 100000, 1000000, 10000000, 100000000) # log10
 
@@ -282,20 +263,23 @@ plot_world_graphic <- ggplot(data = world_map_and_co2) +
   )  +
   guides(fill = guide_legend(title = "Emission Level"))
 
+
 # For .Rmd File
 china_co2_2014 <- filtered_co2 %>% 
   filter(Country.Code == "CHN") %>% 
   select(YR2014)
 
-china_co2_2014 <- paste(china_co2_2014)
+china_co2_2014_map <- paste(format(round(china_co2_2014 / 1e6, 2), trim = TRUE), "Million")
 
 usa_co2_2014 <- filtered_co2 %>% 
   filter(Country.Code == "USA") %>% 
   select(YR2014)
 
-usa_co2_2014 <- paste(usa_co2_2014)
+usa_co2_2014 <- paste(format(round(usa_co2_2014 / 1e6, 2), trim = TRUE), "Million")
 
+###
 ### Interactive Visualization ###
+###
 
 # Filter for co2 emissions and gdp
 co2_interactive <- filtered_co2 %>%
@@ -331,33 +315,55 @@ gdp_co2_interactive <- left_join(gdp_co2_interactive, world_region_info,
   by = c("Country.Name" = "country")
 )
 
-# add life expectancy info to data frame
-gdp_co2_interactive <- left_join(gdp_co2_interactive, filtered_life_expectancy,
-  by = c("Country.Code", "Country.Name", "year")
-)
 
-gdp_co2_interactive <- gdp_co2_interactive %>%
-  filter(Country.Code %in% c("USA", "CHN", "JPN", "DEU", "GBR", "FRA", "IND", "ITA", "BRA", "CAN"))
+top_ten_interactive <- gdp_co2_interactive %>%
+  filter(Country.Code %in% c("USA", "CHN", "JPN", "DEU", "GBR", "FRA", "BRA", "ITA", "RUS", "IND"))
 
+co2_1dim <- top_ten_interactive$co2_emitted
 
-co2_1dim <- gdp_co2_interactive$co2_emitted
-
-plot_interactive <- gdp_co2_interactive %>%
+plot_interactive <- top_ten_interactive %>%
   plot_ly(
-    x = ~ gdp_co2_interactive$GDP,
+    x = ~ top_ten_interactive$GDP,
     y = ~ co2_1dim,
-    frame = gdp_co2_interactive$year,
-    text = gdp_co2_interactive$Country.Name,
-    color = ~ gdp_co2_interactive$region
+    frame = top_ten_interactive$year,
+    text = top_ten_interactive$Country.Name
   ) %>%
   add_markers() %>%
-  add_text(textposition = "left") %>%
+  add_text(textposition = "left") %>% 
   layout(showlegend = FALSE) %>%
   layout(
     title = "Co2 Emissions and GDP of Ten Largest Economies Over Time",
     xaxis = list(title = "GDP (in Trillions of Dollars)", type = "log"),
     yaxis = list(title = "CO2 Emitted (in kt)", type = "log")
-  )
+  ) 
+
+
+# For .Rmd File
+top_economies <- top_ten_interactive %>% 
+  filter(year == "YR2014") %>% 
+  select(Country.Name, co2_emitted, GDP) %>% 
+  arrange(-co2_emitted)
+
+ 
+top_co2 <- paste(format(round(top_economies$co2_emitted / 1e6, 2), trim = TRUE), "Million")
+
+top_gdp <- paste(format(round(top_economies$GDP / 1e12, 2), trim = TRUE), "Trillion")
+
+top_economies$co2_emitted <- top_co2
+
+top_economies$GDP <- top_gdp
+
+east_asia <- gdp_co2_interactive %>% 
+  filter(region == "East Asia & Pacific", year == "YR2014") %>% 
+  arrange(-co2_emitted)
+
+east_asia_top <- sum(east_asia[1:3, "co2_emitted" ])
+
+china_top <- as.numeric(china_co2_2014)
+
+china_pct_ea <- china_top / east_asia_top
+
+china_pct_ea <- paste(round(100*china_pct_ea, 2), "%", sep ="")
 
 # Resources Used:
 # http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html

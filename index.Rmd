@@ -17,33 +17,49 @@ library("plotly")
 source("a6.R")
 ```
 
-## Thesis
-> Co2 emissions has generally been on the rise and is positively correlated with GDP. China, by far, emmits the most CO2.
+## Introduction
+> **Background Info:** According to the [World Resources Institute](http://www.wri.org/blog/2014/05/history-carbon-dioxide-emissions), in 1850, global CO2 emissions was 198,000 metric kilotons(kt). 120 years later, in 1970, global emissions was 14,531,000kt. Almost half a century later, in 2014, global CO2 emissions more than doubled to `r co2_2014` kt. We are emitting a lot more CO2 into the atmosphere than we were just a few generations ago. A few generations farther back, and the whole world was emitting less CO2 than the CO2 emitted by Egypt in 2014.
+
+> **About The Report:** This report aims to help people understand worldwide CO2 emissions better through different graphics, and it will answer three questions: 
+
+1. Are CO2 emissions increasing or decreasing?
+2. What is the relationship between CO2 emissions and GDP?  
+3. Who emits CO2? 
+
+> GDP is "the monetary value of final goods and services" and is often used as an indicator of the size of an economy [(International Monetary Fund)](http://www.imf.org/external/pubs/ft/fandd/basics/gdp.htm).
+
+>The first graphic illustrates total CO2 emissions between 1998 and 2014 (with GDP coloring in the data points). The second graphic illustrates CO2 emissions by world regions over time, each region on its own minigraph and with its own color. The third graphic is a world map, with countries colored in according to level of CO2 output. The fourth graphic shows the top ten economies in 2014. This graphic shows CO2 emissions and GDP over time, both on a log scale. 
+
+> This report will show that Co2 emissions has generally been on the rise, CO2 emissions is positively correlated with GDP, and China emits the most CO2.
+
+> Where can you find all the information used in this report? All of this information can be found on the [World Bank's](http://databank.worldbank.org/data/reports.aspx?source=world-development-indicators&preview=on) website.
 
 ## Summary Visualizations
 
 ### World CO2 Emissions Over Time
 
 ```{r Graphic1 co2 and gdp, echo = FALSE}
-#plot_co2_gdp_graphic
+plot_co2_gdp_graphic
 
 
 ```
 
-> **About The Graph:** This graph shows the change in CO2 emissions (in kilotons) between 1998 and 2014. The colors (from blue to orange to green) represent GDP in trillions of dollars. 
->**Results:** CO2 emissions are on an upward trend and is related to economic performance. CO2 emissions increased in all but one year, 2009. When GDP increases, CO2 levels tend to increase, and when GDP decreases, CO2 levels decrease. This is evident when looking at the data points for 2008 and 2009. In 2008, CO2 Emissions were $`r co2_2008` kt. It decreased to $`r co2_2009` kt. You'll see that GDP also decreased between these years from $`r gdp_2008` to $`r gdp_2009`. When GDP went down, CO2 went down. These data points likely reflect the aftermath of the 2008 Financial Crisis. 
+> **About The Graph:** This graph shows the change in global CO2 emissions (in kilotons) between 1998 and 2014. The colors (from blue to orange to green) represent global GDP in trillions of dollars. 
 
-
+>**Results:** CO2 emissions are on an upward trend and is correlated with economic performance (measured by GDP). When GDP increases, CO2 levels tend to increase, and when GDP decreases, CO2 levels tend to decrease. This is evident when looking at the data points for 2008 and 2009. 2009 was the only year in this time range that CO2 emissions actually dropped. In 2008, CO2 Emissions were $`r co2_2008` kt. It decreased to $`r co2_2009` kt. You'll see that GDP also decreased between these years from $`r gdp_2008` to $`r gdp_2009` (you'll observe that the data point is more orange than green). These data points likely reflect the aftermath of the 2008 Financial Crisis. 
 
 ### Regional CO2 Emissions Over Time
 ```{r Graphic2 Regional Emissions, echo = FALSE}
-# plot_regional_graphic <- plot_regional + facet_grid(. ~ Region) +
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
-# plot_regional_graphic
+plot_regional_graphic <- plot_regional + facet_grid(. ~ Region) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+plot_regional_graphic
 ```
 
 > **About The Graph:** This graph shows a regional breakdown of CO2 emissions between 2004 and 2014. 
->**Results:** CO2 levels are generally on the rise, and rapidly so in East Asia, which is where China is located. Regions for most CO2 emissions to least: 
+
+>**Results:** CO2 levels are generally on the rise, and rapidly so in East Asia. East Asian countries include China, Japan, and South Korea. 
+
+>Regions from highest to lowest CO2 levels: 
 
 1. East Asia & Pacific
 2. Europe and Central Asia
@@ -52,18 +68,19 @@ source("a6.R")
 5. Latin America & Caribbean
 6. Sub-Saharan Africa.
 
-> Sub-Saharan Africa has the lowest CO2 emissions (`r africa_co2_2014` kt), and it also has the lowest GDP in 2014, $`r africa_gdp_2014`. Latin America & Caribbean, by contrast, had a GDP of $`r latin_gdp_2014` and CO2 emissions of `r latin_gdp_2014` kt in 2014. This demonstrates that CO2 levels and GDP are positively correlated. 
+> Sub-Saharan Africa has the lowest CO2 emissions (`r africa_co2_2014` kt), and we also know from current events that it's GDP is likely to be low. In fact, this region had the lowest GDP in 2014, $`r africa_gdp_2014`. Latin America & Caribbean, by contrast, had a GDP of $`r latin_gdp_2014` and CO2 emissions of `r latin_gdp_2014` kt in 2014. CO2 emissions and GDP are both lower in Sub-Saharan Africa compared to Latin America. This further demonstrates that CO2 levels and GDP are positively correlated. 
 
 
 ## World Map of CO2 Emissions
 
 ### CO2 Emissions by Country
 ```{r Graphic3 World Map, echo = FALSE}
-#plot_world_graphic
+plot_world_graphic
 ```
 
 > **About The Graph:** This graphic shows a map of the world with countries colored in with the color corresponding to the level of CO2 emissions in 2014. 
->**Results:** China is by far the largest emitter of CO2 in 2014; it's also the only one in the +10,000,000kt category. In 2014, it emitted `r china_co2_2014`kt of CO2. For comparison, the second largest emitter in 2014, the United States, emitted `r usa_co2_2014`kt. The top two CO2 emitters are also have top two highest GDPs, giving more evidence that GDP and CO2 emission levels are positiviely correlated.
+
+>**Results:** China is by far the largest emitter of CO2 in 2014; it's also the only one in the +10,000,000kt category. In 2014, it emitted `r china_co2_2014_map` kt of CO2. For comparison, the second largest emitter in 2014, the United States, emitted `r usa_co2_2014` kt.To answer the question, "who emits CO2?", this graphic shows that China emits a lot of it. In fact, of the top three emitters in East Asia and the Pacific (China, Japan, and South Korea), China emits `r china_pct_ea` of it (2014).
 
 
 ## Interactive Visualization
@@ -73,5 +90,25 @@ source("a6.R")
 plot_interactive
 ```
 
+> **About The Graph:** This graph shows GDP and CO2 emissions over time (both on a log scale) for the top ten largest economies in 2014 according to the World Bank. 
+
+> **Results:** You'll notice China and India in particular are moving from the bottom left to the top right over time as both GDP and CO2 emitted increase. Other top economies were the United States, Japan, Germany, United Kingdom, France, Brazil, Italy and Russia. 
+
+>Additionally, you'll notice that in 2009, most data points move to the bottom left slightly; in the aftermath of the 2008 Financial Crisis, GDP and CO2 emissions went down for most of these countries. 
+
+>Generally, all the countries are moving toward the top right, higher GDP and higher CO2 emissions. The top top two emitters of CO2 also have the two highest GDPs, China and the United States. This further gives evidence that GDP and CO2 are positively correlated. Below is a table showing 2014 CO2 and GDP for the ten countries included on this interactive visual. It should also be noted that between 2004 and 2005, China suprassed the United States in CO2 emissions.
+
+#### Table of Top Ten Economies in 2014
+`r kable(top_economies)`
+
+
+## Conclusion
+1. **Are CO2 emissions increasing or decreasing?** CO2 levels are generally increasing. The first, second, and fourth visual demonstrate that over time, CO2 levels are going up.
+2. **What is the relationship between CO2 emissions and GDP?** GDP and CO2 have a positive relationship with each other. The first and fourth visual show that as CO2 increased, so did GDP.
+3. **Who emits CO2?** China emits the most CO2. The second visual shows that East Asia and the Pacific emitted the most CO2 and the third visual shows that China by far emits the most CO2. The fourth visual also shows that China emits the most CO2 later during the period. 
+
 ## Sources
+-  [World Resources Institute](http://www.wri.org/blog/2014/05/history-carbon-dioxide-emissions) (for emissions in 1850 and 1970)
+- [International Monetary Fund](http://www.imf.org/external/pubs/ft/fandd/basics/gdp.htm)
 - [World Bank Development Indicators](http://databank.worldbank.org/data/reports.aspx?source=world-development-indicators&preview=on)
+- Assignment 3 data (used to match regions and countries together)
