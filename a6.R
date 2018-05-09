@@ -168,7 +168,7 @@ regional_data$year <- as.numeric(regional_data$year)
 
 plot_regional <- ggplot(regional_data, aes(year, co2_emitted, color = factor(Region))) + 
   geom_point()  +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position = "bottom") + 
   guides(color = guide_legend(title = "Region")) +
   labs(title = "Regional Breakdown of CO2 Emissions", x = "Year", y = "CO2 Emissions (kt)") +
   scale_y_continuous(breaks = c(2.5e06, 5e06, 7.5e06, 1e07, 1.25e07), 
