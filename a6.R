@@ -363,7 +363,7 @@ china_top <- as.numeric(china_co2_2014)
 
 china_pct_ea <- china_top / east_asia_top
 
-china_pct_ea <- paste(round(100*china_pct_ea, 2), "%", sep ="")
+china_pct_ea <- paste(round(100*china_pct_ea, 2), "%", sep = "")
 
 # Resources Used:
 # http://eriqande.github.io/rep-res-web/lectures/making-maps-with-R.html
